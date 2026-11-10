@@ -1,0 +1,8 @@
+/build/
+/dist/
+/target/
+/nbproject/
+/src/conf/db.properties
+*.class
+.idea/
+.vscode/

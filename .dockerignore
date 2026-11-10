@@ -1,0 +1,7 @@
+build
+dist
+target
+.git
+.gitignore
+nbproject
+src/conf/db.properties
