@@ -1,5 +1,7 @@
--- Ejecutar una sola vez en TiDB Cloud SQL Editor (base de datos test).
--- Si prefieres otra base, créala y ajusta DB_URL en Render.
+-- Ejecutar en TiDB Cloud SQL Editor. No elimina datos existentes.
+CREATE DATABASE IF NOT EXISTS gluco_api;
+USE gluco_api;
+
 CREATE TABLE IF NOT EXISTS usuario (
     idUsuario INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL,
