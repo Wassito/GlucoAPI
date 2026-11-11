@@ -1,12 +1,16 @@
 package org.lasalle.dao;
 
 import java.sql.SQLException;
+import java.util.List;
 import org.lasalle.model.Medida;
 
 /**
  * Contrato de las operaciones de acceso a datos de medida.
  */
 public interface MedidaDAO {
+
+    /** Devuelve las medidas registradas para un usuario. */
+    List<Medida> getByIdUsuario(int idUsuario) throws SQLException;
 
     /**
      * Inserta una nueva medida de glucosa.

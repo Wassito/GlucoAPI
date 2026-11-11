@@ -3,9 +3,11 @@ package org.lasalle.rest;
 import com.google.gson.Gson;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.sql.SQLException;
@@ -14,6 +16,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -36,6 +39,32 @@ public class RestMedida {
             = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     private final MedidaDAO medidaDAO = new MedidaDAOImpl();
+
+    /** Devuelve todas las medidas de un usuario, o una lista vacía si no tiene medidas. */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getMedidasPorUsuario(@QueryParam("idUsuario") String idUsuario) {
+        try {
+            int idUsuarioNumero = parseEntero(idUsuario, "El idUsuario es obligatorio");
+            if (idUsuarioNumero <= 0) {
+                return respuestaError(Response.Status.BAD_REQUEST,
+                        "El idUsuario debe ser mayor que cero");
+            }
+
+            List<Medida> medidas = medidaDAO.getByIdUsuario(idUsuarioNumero);
+            Map<String, Object> cuerpo = new LinkedHashMap<>();
+            cuerpo.put("success", true);
+            cuerpo.put("data", medidas);
+            return Response.ok(GSON.toJson(cuerpo), MediaType.APPLICATION_JSON).build();
+
+        } catch (IllegalArgumentException e) {
+            return respuestaError(Response.Status.BAD_REQUEST, e.getMessage());
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error al consultar las medidas", e);
+            return respuestaError(Response.Status.INTERNAL_SERVER_ERROR,
+                    "No se pudieron consultar las medidas en la base de datos");
+        }
+    }
 
     /**
      * Registra una nueva medida de glucosa recibiendo los datos como form

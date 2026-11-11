@@ -7,6 +7,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import org.lasalle.db.Conexion;
 import org.lasalle.model.Medida;
 
@@ -15,9 +18,43 @@ import org.lasalle.model.Medida;
  */
 public class MedidaDAOImpl implements MedidaDAO {
 
+    private static final DateTimeFormatter FORMATO_FECHA_HORA
+            = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    private static final String SQL_SELECT_BY_USUARIO
+            = "SELECT idMedida, idUsuario, glucosa, fechaHora, contexto, notas "
+            + "FROM medida WHERE idUsuario = ? ORDER BY fechaHora DESC, idMedida DESC";
+
     private static final String SQL_INSERT
             = "INSERT INTO medida (idUsuario, glucosa, fechaHora, contexto, notas) "
             + "VALUES (?, ?, ?, ?, ?)";
+
+    @Override
+    public List<Medida> getByIdUsuario(int idUsuario) throws SQLException {
+        List<Medida> medidas = new ArrayList<>();
+
+        try (Connection conexion = Conexion.getConnection();
+                PreparedStatement sentencia = conexion.prepareStatement(SQL_SELECT_BY_USUARIO)) {
+            sentencia.setInt(1, idUsuario);
+
+            try (ResultSet resultado = sentencia.executeQuery()) {
+                while (resultado.next()) {
+                    Medida medida = new Medida();
+                    medida.setIdMedida(resultado.getInt("idMedida"));
+                    medida.setIdUsuario(resultado.getInt("idUsuario"));
+                    medida.setGlucosa(resultado.getInt("glucosa"));
+                    Timestamp fechaHora = resultado.getTimestamp("fechaHora");
+                    medida.setFechaHora(fechaHora == null ? null
+                            : fechaHora.toLocalDateTime().format(FORMATO_FECHA_HORA));
+                    medida.setContexto(resultado.getString("contexto"));
+                    medida.setNotas(resultado.getString("notas"));
+                    medidas.add(medida);
+                }
+            }
+        }
+
+        return medidas;
+    }
 
     @Override
     public Medida save(Medida medida) throws SQLException {
