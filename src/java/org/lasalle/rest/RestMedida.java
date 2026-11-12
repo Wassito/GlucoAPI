@@ -40,18 +40,23 @@ public class RestMedida {
 
     private final MedidaDAO medidaDAO = new MedidaDAOImpl();
 
-    /** Devuelve todas las medidas de un usuario, o una lista vacía si no tiene medidas. */
+    /** Devuelve todas las medidas, o solo las del usuario indicado. */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getMedidasPorUsuario(@QueryParam("idUsuario") String idUsuario) {
+    public Response getMedidas(@QueryParam("idUsuario") String idUsuario) {
         try {
-            int idUsuarioNumero = parseEntero(idUsuario, "El idUsuario es obligatorio");
-            if (idUsuarioNumero <= 0) {
-                return respuestaError(Response.Status.BAD_REQUEST,
-                        "El idUsuario debe ser mayor que cero");
+            List<Medida> medidas;
+            if (idUsuario == null) {
+                medidas = medidaDAO.getAllMedidas();
+            } else {
+                int idUsuarioNumero = parseEntero(idUsuario, "El idUsuario es obligatorio");
+                if (idUsuarioNumero <= 0) {
+                    return respuestaError(Response.Status.BAD_REQUEST,
+                            "El idUsuario debe ser mayor que cero");
+                }
+                medidas = medidaDAO.getByIdUsuario(idUsuarioNumero);
             }
 
-            List<Medida> medidas = medidaDAO.getByIdUsuario(idUsuarioNumero);
             Map<String, Object> cuerpo = new LinkedHashMap<>();
             cuerpo.put("success", true);
             cuerpo.put("data", medidas);

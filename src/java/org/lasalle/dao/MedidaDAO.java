@@ -9,6 +9,9 @@ import org.lasalle.model.Medida;
  */
 public interface MedidaDAO {
 
+    /** Devuelve todas las medidas registradas. */
+    List<Medida> getAllMedidas() throws SQLException;
+
     /** Devuelve las medidas registradas para un usuario. */
     List<Medida> getByIdUsuario(int idUsuario) throws SQLException;
 
